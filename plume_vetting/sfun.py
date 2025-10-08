@@ -115,7 +115,7 @@ def get_neighboring_points(top_points, square_size, point_inside_plume, remove_c
         half_size = square_size // 2
         neighboring_points = [(i + di, j + dj) for di in range(-half_size, half_size + 1) for dj in range(-half_size, half_size + 1)]
         if remove_center_flag==1:
-         neighboring_points.remove(point)
+            neighboring_points.remove(point)
         all_neighboring_points.extend(neighboring_points)
     
     all_neighboring_points = list(set(all_neighboring_points)) # remove duplicates
@@ -141,7 +141,8 @@ def get_radiance_ratio(wl, radius, num_pts, rdn, mf, orig_plume_coord, orig_poin
     if ite==0:
         points_inside_plume=orig_points_inside_plume
         plume_coord=orig_plume_coord
-    else:        
+    else:
+        assert False # for now we just want to run it once! disable this, so that we don't run in by mistake ...
         rotation_angle = np.random.uniform(0, 2 * np.pi)
         rotation_center = find_center(orig_points_inside_plume)  
         rotated_orig_points_inside_plume = rotate_points(orig_points_inside_plume, rotation_center, rotation_angle)  #rotate points inside plume
@@ -153,7 +154,7 @@ def get_radiance_ratio(wl, radius, num_pts, rdn, mf, orig_plume_coord, orig_poin
             points_inside_plume=translated_pts
             plume_coord=translated_plume_coord
 
-    points_inside_plume = [(int(x), int(y)) for x, y in points_inside_plume]  # convert all points to integer tuples 
+    points_inside_plume = [(int(x), int(y)) for x, y in points_inside_plume]  # convert all points to integer tuples
     points_inside_plume = [point for point in points_inside_plume if not combined_mask[point[1], point[0]]]  # exclude bad pixels
 
     in_plume_mf = [mf[point[1], point[0]] for point in points_inside_plume]
@@ -173,15 +174,15 @@ def get_radiance_ratio(wl, radius, num_pts, rdn, mf, orig_plume_coord, orig_poin
     top_points = sorted_points[:num_pts]
 
     if dilate_flag==1:  # dilate pixels
-       square_size=3
-       top_points = get_neighboring_points(top_points, square_size, points_inside_plume, remove_center_flag)
+        square_size=3
+        top_points = get_neighboring_points(top_points, square_size, points_inside_plume, remove_center_flag)
 
     if pos_flag==1:
-       top_points = [point for point in top_points if mf[point[1], point[0]] > 0]
+        top_points = [point for point in top_points if mf[point[1], point[0]] > 0]
 
     top_points = [(y, x) for x, y in top_points] # swap x y to so that it is (row, col)
     if not top_points:
-       return None
+        return None
     
     # define bounds for the region to search for background pixels
     x_coords, y_coords = zip(*top_points)
@@ -204,7 +205,7 @@ def get_radiance_ratio(wl, radius, num_pts, rdn, mf, orig_plume_coord, orig_poin
 
     # each row of similarity_matrix corresponds to a target pixel; each column corresponds to a background pixel
     if dist_opt==0:
-       similarity_matrix = cdist(A_data, B_data, 'euclidean') # smaller value means higher similarity
+        similarity_matrix = cdist(A_data, B_data, 'euclidean') # smaller value means higher similarity
     elif dist_opt==1:
         A_data_normalized = A_data / np.sum(np.abs(A_data), axis=1, keepdims=True)
         B_data_normalized = B_data / np.sum(np.abs(B_data), axis=1, keepdims=True)  # L1 normalized
@@ -219,7 +220,7 @@ def get_radiance_ratio(wl, radius, num_pts, rdn, mf, orig_plume_coord, orig_poin
         similarity_matrix = 1-np.dot(A_norm, B_norm.T)  # smaller value means higher similarity
 
     if allow_repetition==0:
-       row_ind, col_ind = linear_sum_assignment(similarity_matrix) # find the optimal pairs that minimize global cost (highest similarity)
+        row_ind, col_ind = linear_sum_assignment(similarity_matrix) # find the optimal pairs that minimize global cost (highest similarity)
     else:
         row_ind = np.arange(similarity_matrix.shape[0]) # row indices
         col_ind = np.argmin(similarity_matrix, axis=1) # index of the smallest element in each row
@@ -569,23 +570,27 @@ def six_panel_figure(ii, pics_folder, plot_data_folder, s, mf, orig_contour, tra
         bbox=dict(boxstyle="round,pad=0.3", edgecolor='gray', facecolor='none'),
         annotation_clip=False)
 
-    #panel 2: RGB 
-    ax = fig1.add_subplot(outer_grid[0, 1])
-    rgb_rfl= s.get_rgb_rfl(r = 35)  
-    temp = rgb_rfl.copy()
-    ax.imshow(temp)
-    for pcoord in trans_contour:                        
-            ax.plot(*zip(*pcoord), color='black')
-    ax.plot(*zip(*orig_contour), color='r', label='Original plume')
-    ax.plot(*zip(*trans_contour[index1]), color='g', label='Shifted plume wt smallest norm dist')
-    ax.plot(*zip(*trans_contour[index2]), color='m', label='Shifted plume wt highest MF')
-    if other_plume_coords:
-        for j in range(0, len(other_plume_coords)):  
-            other_plume_coord = other_plume_coords[j]
-            if j == 0:
-                ax.plot(*zip(*other_plume_coord), color='b', label='Other plumes')
-            else:
-                ax.plot(*zip(*other_plume_coord), color='b')
+    #panel 2: RGB
+    try:
+        ax = fig1.add_subplot(outer_grid[0, 1])
+        rgb_rfl= s.get_rgb_rfl(r = 35)
+        temp = rgb_rfl.copy()
+        ax.imshow(temp)
+        for pcoord in trans_contour:
+                ax.plot(*zip(*pcoord), color='black')
+        ax.plot(*zip(*orig_contour), color='r', label='Original plume')
+        ax.plot(*zip(*trans_contour[index1]), color='g', label='Shifted plume wt smallest norm dist')
+        ax.plot(*zip(*trans_contour[index2]), color='m', label='Shifted plume wt highest MF')
+        if other_plume_coords:
+            for j in range(0, len(other_plume_coords)):
+                other_plume_coord = other_plume_coords[j]
+                if j == 0:
+                    ax.plot(*zip(*other_plume_coord), color='b', label='Other plumes')
+                else:
+                    ax.plot(*zip(*other_plume_coord), color='b')
+    except:
+        print("exception in RGB")
+        pass
 
     # panel 3: reflectance and radiance
     ax = fig1.add_subplot(outer_grid[0, 2])
