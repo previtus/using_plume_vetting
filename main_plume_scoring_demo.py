@@ -65,7 +65,7 @@ def load_and_prep_data(tile_id, predictions_path, raws_download_folder):
     return rdn, cmf_data, clouds_and_surface_water_mask, plume_polygons, cmf_path, scene_target_signature
 
 def run_plume_vetting_on_scene(rdn, cmf, mask, vectors, cmf_path, scene_target_signature=None, debug_viz = True,
-                               num_pts = 40, min_polygon_size = 100, debug_jump_to = None):
+                               num_pts = 40, min_polygon_size = 0, debug_jump_to = None):
     # HYPERPARAMS:
     mf_threshold = 30 # The range of matched filter values around zero for the background pixels
     radius = 200 # how far from the plume center do we look for points?
@@ -209,5 +209,7 @@ if __name__ == '__main__':
     print("cmf_path:", cmf_path) # .../EMIT_L2B_CH4ENH_002_20240215T193425_2404613_030.tif
     print("scene_target_signature:", scene_target_signature.shape)
 
-    run_plume_vetting_on_scene(rdn, cmf, mask, vectors, cmf_path, scene_target_signature, debug_viz=True,
+    scores_per_polygon = run_plume_vetting_on_scene(rdn, cmf, mask, vectors, cmf_path, scene_target_signature, debug_viz=True,
                                num_pts = num_pts, debug_jump_to=debug_jump_to)
+
+    print("Output:", scores_per_polygon)
