@@ -195,21 +195,22 @@ if __name__ == '__main__':
     num_pts = 40
     debug_jump_to = None
 
-    tile_id = "EMIT_L1B_RAD_001_20240215T193425_2404613_030" # one large event
+    # tile_id = "EMIT_L1B_RAD_001_20240215T193425_2404613_030"
+    tile_id = "EMIT_L1B_RAD_001_20240625T065045_2417705_028"
     raws_download_folder = "data/"+tile_id
     predictions_path = "data/"+tile_id+"/ensemble_predictions.gpkg"
     rdn, cmf, mask, vectors, cmf_path, scene_target_signature = load_and_prep_data(tile_id,predictions_path,raws_download_folder)
 
     # TODO: Feel free to completely replace the data loading part with your own functions ... this should work on LP DAAC formats
     # TODO: Following shapes are kept for easier reproduction...
-    print("rdn:", rdn.shape) # (2028, 1814, 285)
-    print("cmf:", cmf.shape) # (2028, 1814)
-    print("mask:", mask.shape) # (2028, 1814)
-    print("vectors:", vectors) # list of shapely polygons ... [<POLYGON ((-64.878 9.179, ...>, <POLYGON ((-65.123 9.711, ....>]
-    print("cmf_path:", cmf_path) # .../EMIT_L2B_CH4ENH_002_20240215T193425_2404613_030.tif
+    print("rdn:", rdn.shape) # (2032, 2097, 285)
+    print("cmf:", cmf.shape) # (2032, 2097)
+    print("mask:", mask.shape) # (2032, 2097)
+    print("vectors:", vectors) # list of shapely polygons ... [<POLYGON (...>, <POLYGON (....>]
+    print("cmf_path:", cmf_path) # .../EMIT_L2B_CH4ENH_002_20240625T065045_2417705_028.tif
     print("scene_target_signature:", scene_target_signature.shape)
 
     scores_per_polygon = run_plume_vetting_on_scene(rdn, cmf, mask, vectors, cmf_path, scene_target_signature, debug_viz=True,
-                               num_pts = num_pts, debug_jump_to=debug_jump_to)
+                               num_pts = num_pts, debug_jump_to=debug_jump_to, min_polygon_size = 20)
 
     print("Output:", scores_per_polygon)
