@@ -1,3 +1,7 @@
+# Colab demo
+
+It's best to start checking and running the Google Colab demo <a href="https://colab.research.google.com/github/previtus/using_plume_vetting/blob/main/plume_vetting_colab_demo.ipynb">Quick Colab Example <img src="https://colab.research.google.com/assets/colab-badge.svg" height=16px></a>
+
 # How to use?
 
 1.) Install required libraries (the usual suspects, plus "pip install georeader").
